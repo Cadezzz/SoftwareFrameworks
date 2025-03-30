@@ -5,13 +5,12 @@ namespace WeatherProject.OpenWeatherMap;
 public class OpenWeatherClient
 {
     private static readonly HttpClient client = new HttpClient();
-    private const string apiKey = "197688b2c19ec60e11bddf5448ebb1d0";
-    private const string city = "Vienna";
-    private static readonly string apiUrl = $"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={apiKey}&units=metric";
+    private readonly string apiKey = "197688b2c19ec60e11bddf5448ebb1d0";
 
-    public async Task<WeatherData?> GetWeatherDataAsync()
+    public async Task<WeatherData?> GetWeatherDataAsync(string cityName)
     {
-        string data = string.Empty;
+        var apiUrl = $"https://api.openweathermap.org/data/2.5/weather?q={cityName}&appid={apiKey}&units=metric";
+        var data = string.Empty;
         try
         {
             HttpResponseMessage httpResponse = await client.GetAsync(apiUrl);
@@ -33,7 +32,7 @@ public class OpenWeatherClient
             HumidityData humidityData = MapHumidityData(document);
             WindData windData = MapWindData(document);
             RainData rainData = MapRainData(document);
-            return new WeatherData(temperatureData, humidityData, windData, rainData);
+            return new WeatherData(cityName, DateTime.UtcNow, temperatureData.Temperature, temperatureData.TemperatureFeelsLike, humidityData.Humidity, windData.WindSpeed, windData.WindDegrees, rainData.RainFall);
         }
     }
 
@@ -42,14 +41,14 @@ public class OpenWeatherClient
         JsonElement root = document.RootElement;
         double temp = root.GetProperty("main").GetProperty("temp").GetDouble();
         double feels_like = root.GetProperty("main").GetProperty("feels_like").GetDouble();
-        return new TemperatureData(DateTime.UtcNow, temp, feels_like);
+        return new TemperatureData(temp, feels_like);
     }
 
     private HumidityData MapHumidityData(JsonDocument document)
     {
         JsonElement root = document.RootElement;
         int humidity = root.GetProperty("main").GetProperty("humidity").GetInt32();
-        return new HumidityData(DateTime.UtcNow, humidity);
+        return new HumidityData(humidity);
     }
 
     private WindData MapWindData(JsonDocument document)
@@ -57,7 +56,7 @@ public class OpenWeatherClient
         JsonElement root = document.RootElement;
         double speed = root.GetProperty("wind").GetProperty("speed").GetDouble();
         int deg = root.GetProperty("wind").GetProperty("deg").GetInt32();
-        return new WindData(DateTime.UtcNow, speed, deg);
+        return new WindData(speed, deg);
     }
 
     private RainData MapRainData(JsonDocument document)
@@ -77,6 +76,6 @@ public class OpenWeatherClient
                 rainfall = rain3h.GetDouble();
             }
         }
-        return new RainData(DateTime.UtcNow, rainfall);
+        return new RainData(rainfall);
     }
 }

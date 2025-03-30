@@ -15,11 +15,7 @@ class KafkaProducer
     {
         using (producer = new ProducerBuilder<string, string>(config).Build())
         {
-            await SendMessageAsync("weather-data", DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"), JsonSerializer.Serialize(weatherData));
-            await SendMessageAsync("temperature-data", DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"), JsonSerializer.Serialize(weatherData.TemperatureData));
-            await SendMessageAsync("humidity-data", DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"), JsonSerializer.Serialize(weatherData.HumidityData));
-            await SendMessageAsync("wind-speed-data", DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"), JsonSerializer.Serialize(weatherData.WindData));
-            await SendMessageAsync("rainfall-data", DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"), JsonSerializer.Serialize(weatherData.RainData));
+            await SendMessageAsync($"weather-{weatherData.CityName.ToLowerInvariant()}", DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff"), JsonSerializer.Serialize(weatherData));
         }
     }
 

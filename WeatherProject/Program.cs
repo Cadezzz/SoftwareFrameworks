@@ -1,6 +1,5 @@
 ﻿using WeatherProject.Kafka;
 using WeatherProject.OpenWeatherMap;
-using System.Timers;
 
 namespace WeatherProject;
 
@@ -11,17 +10,21 @@ public class Program
         var openWeatherClient = new OpenWeatherClient();
         var producer = new KafkaProducer();
 
-     
-        var timer = new System.Timers.Timer(60000);
-        timer.Elapsed += async (sender, e) => { 
-            var weatherData = await openWeatherClient.GetWeatherDataAsync();
-            if (weatherData != null)
+        string[] cities = ["Vienna", "Graz", "Salzburg"];
+        foreach (var city in cities)
+        {
+            var timer = new System.Timers.Timer(60000);
+            timer.Elapsed += async (sender, e) =>
             {
-                await producer.ProduceWeatherDataAsync(weatherData);
-            }
-        };
-        timer.AutoReset = true;
-        timer.Enabled = true;
+                var weatherData = await openWeatherClient.GetWeatherDataAsync(city);
+                if (weatherData != null)
+                {
+                    await producer.ProduceWeatherDataAsync(weatherData);
+                }
+            };
+            timer.AutoReset = true;
+            timer.Enabled = true;
+        }
         Console.ReadLine();
     }
 }
