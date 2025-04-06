@@ -21,10 +21,10 @@ public class KafkaProducerService : BackgroundService
         _producer = new ProducerBuilder<string, string>(_config).Build();
     }
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Kafka Producer Service is starting.");
-        while (!stoppingToken.IsCancellationRequested)
+        while (!cancellationToken.IsCancellationRequested)
         {
             try
             {
@@ -36,6 +36,7 @@ public class KafkaProducerService : BackgroundService
                         await ProduceWeatherDataAsync(weatherData);
                     }
                 }
+                await Task.Delay(TimeSpan.FromSeconds(60), cancellationToken);
             }
             catch (OperationCanceledException)
             {
