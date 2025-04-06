@@ -10,8 +10,10 @@ public class Program
         IHost host = Host.CreateDefaultBuilder(args)
             .ConfigureServices((hostContext, services) =>
             {
+                services.AddHostedService<KafkaProducerService>();
                 services.AddHostedService<KafkaConsumerService>();
                 services.AddSingleton<ISQLRepository, SQLRepository>();
+                services.AddSingleton<IOpenWeatherClient, OpenWeatherClient>();
             })
             .Build();
         await host.RunAsync();

@@ -1,8 +1,8 @@
 ﻿using System.Text.Json;
 
-namespace WeatherProject.OpenWeatherMap;
+namespace WeatherBackend.Services;
 
-public class OpenWeatherClient
+public class OpenWeatherClient : IOpenWeatherClient
 {
     private static readonly HttpClient client = new HttpClient();
     private readonly string apiKey = "197688b2c19ec60e11bddf5448ebb1d0";
