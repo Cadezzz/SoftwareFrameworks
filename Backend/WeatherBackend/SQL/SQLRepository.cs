@@ -21,6 +21,35 @@ public class SQLRepository : ISQLRepository
         return Task.CompletedTask;
     }
 
+    public async Task EnsureDatabaseExistsAsync()
+    {
+        _logger.LogInformation("Ensuring weather database exists.");
+        try
+        {
+            using (SqlConnection connection = new SqlConnection("Data Source=localhost,1433;Initial Catalog=master;User ID=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True"))
+            {
+                await connection.OpenAsync();
+
+                string createWeatherDataTable = @"
+IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = N'Weather')
+BEGIN
+    CREATE DATABASE Weather;
+END
+";
+                using (SqlCommand command = new SqlCommand(createWeatherDataTable, connection))
+                {
+                    await command.ExecuteNonQueryAsync();
+                    Thread.Sleep(10000);
+                    _logger.LogInformation("Database 'Weather' was created.");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while creating weather table.");
+        }
+    }
+
     private void EnsureTableExists()
     {
         _logger.LogInformation("Ensuring weather table exists.");
@@ -66,7 +95,7 @@ END
     public async Task InsertWeatherDataAsync(WeatherData weatherData)
     {
         var recentWeatherData = await GetRecentWeatherDataAsync(weatherData.CityName);
-        if (WeatherDataAlreadyExists(recentWeatherData, weatherData))
+        if (recentWeatherData != null && WeatherDataAlreadyExists(recentWeatherData, weatherData))
         {
             return;
         }
@@ -157,7 +186,7 @@ ORDER BY
         return null;
     }
 
-    private bool WeatherDataAlreadyExists(WeatherData weatherDataDB, WeatherData weatherDataStream)
+    private bool WeatherDataAlreadyExists(WeatherData? weatherDataDB, WeatherData weatherDataStream)
     {
         if (weatherDataDB.Temperature == weatherDataStream.Temperature
             && weatherDataDB.TemperatureFeelsLike == weatherDataStream.TemperatureFeelsLike

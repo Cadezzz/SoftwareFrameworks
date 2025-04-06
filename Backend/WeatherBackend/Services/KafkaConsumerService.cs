@@ -23,12 +23,13 @@ public class KafkaConsumerService : BackgroundService
         };
 
         _consumer = new ConsumerBuilder<Ignore, string>(config).Build();
-        _consumer.Subscribe(new[] { "weather-vienna", "weather-graz", "weather-salzburg" });
+        _consumer.Subscribe(new[] { "weather-vienna", "weather-krems", "weather-linz", "weather-eisenstadt", "weather-graz", "weather-klagenfurt", "weather-salzburg", "weather-innsbruck", "weather-bregenz" });
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         _logger.LogInformation("Kafka Consumer Service is starting.");
+        await _databaseRepository.EnsureDatabaseExistsAsync();
 
         while (!stoppingToken.IsCancellationRequested)
         {

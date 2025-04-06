@@ -10,7 +10,7 @@ public class Program
         var openWeatherClient = new OpenWeatherClient();
         var producer = new KafkaProducer();
 
-        string[] cities = ["Vienna", "Graz", "Salzburg"];
+        string[] cities = ["Vienna", "Krems", "Linz", "Eisenstadt", "Graz", "Salzburg", "Klagenfurt", "Innsbruck", "Bregenz"];
         foreach (var city in cities)
         {
             var timer = new System.Timers.Timer(60000);
